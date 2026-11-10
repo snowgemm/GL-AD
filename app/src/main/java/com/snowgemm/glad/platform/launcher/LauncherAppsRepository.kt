@@ -1,19 +1,23 @@
 package com.snowgemm.glad.platform.launcher
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.LauncherApps
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
-import android.content.pm.LauncherApps
 import android.os.Handler
 import android.os.Looper
+import android.os.UserManager
 import android.util.LruCache
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
@@ -30,6 +34,7 @@ class AndroidLauncherAppsRepository(
 ) : LauncherAppsRepository {
     private val appContext = context.applicationContext
     private val launcherApps = appContext.getSystemService(LauncherApps::class.java)
+    private val userManager = appContext.getSystemService(UserManager::class.java)
     private val densityDpi = appContext.resources.displayMetrics.densityDpi
     private val iconSizePx = (52 * appContext.resources.displayMetrics.density)
         .toInt()
@@ -42,12 +47,12 @@ class AndroidLauncherAppsRepository(
     }
 
     override fun observeApps(): Flow<List<LaunchableApp>> = callbackFlow {
-        val callback = object : LauncherApps.Callback() {
-            private fun notifyPackagesChanged() {
-                iconCache.evictAll()
-                trySend(Unit)
-            }
+        fun notifyPackagesChanged() {
+            iconCache.evictAll()
+            trySend(Unit)
+        }
 
+        val callback = object : LauncherApps.Callback() {
             override fun onPackageAdded(packageName: String, user: android.os.UserHandle) {
                 notifyPackagesChanged()
             }
@@ -75,13 +80,46 @@ class AndroidLauncherAppsRepository(
             ) {
                 notifyPackagesChanged()
             }
+
+            override fun onPackagesSuspended(
+                packageNames: Array<out String>,
+                user: android.os.UserHandle,
+            ) {
+                notifyPackagesChanged()
+            }
+
+            override fun onPackagesUnsuspended(
+                packageNames: Array<out String>,
+                user: android.os.UserHandle,
+            ) {
+                notifyPackagesChanged()
+            }
+        }
+
+        val profileReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                notifyPackagesChanged()
+            }
+        }
+        val profileFilter = IntentFilter().apply {
+            addAction(Intent.ACTION_MANAGED_PROFILE_ADDED)
+            addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED)
+            addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE)
+            addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
         }
 
         launcherApps.registerCallback(callback, Handler(Looper.getMainLooper()))
+        ContextCompat.registerReceiver(
+            appContext,
+            profileReceiver,
+            profileFilter,
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
         trySend(Unit)
 
         awaitClose {
             launcherApps.unregisterCallback(callback)
+            appContext.unregisterReceiver(profileReceiver)
         }
     }
         .conflate()
@@ -90,21 +128,24 @@ class AndroidLauncherAppsRepository(
                 queryLaunchableApps()
             }
         }
-        .distinctUntilChanged { previous, current ->
-            previous.map { it.id to it.label } == current.map { it.id to it.label }
-        }
 
     private fun queryLaunchableApps(): List<LaunchableApp> {
-        return launcherApps.profiles
+        val profiles = try {
+            launcherApps.profiles
+        } catch (_: SecurityException) {
+            return emptyList()
+        }
+
+        return profiles
             .flatMap { profile ->
                 try {
-                    launcherApps.getActivityList(null, profile).map { activityInfo ->
+                    launcherApps.getActivityList(null, profile).mapNotNull { activityInfo ->
                         val component = activityInfo.componentName
-                        val profileId = activityInfo.user.identifier
-                        val id = "${component.flattenToString()}@$profileId"
+                        val profileSerial = userManager.getSerialNumberForUser(activityInfo.user)
+                        if (profileSerial < 0L) return@mapNotNull null
 
                         LaunchableApp(
-                            id = id,
+                            id = "${component.flattenToString()}@${profileSerial}",
                             label = activityInfo.label
                                 .toString()
                                 .ifBlank { component.packageName },
