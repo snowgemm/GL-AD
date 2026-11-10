@@ -12,9 +12,10 @@
 - [x] Confirm repository metadata and default branch.
 - [x] Confirm repository was empty before bootstrap.
 - [x] Add project overview and create a dedicated foundation branch.
-- [ ] Add product, architecture, design, and implementation specifications.
-- [ ] Add minimal Android app scaffold and CI.
+- [x] Add product, architecture, design, and implementation specifications.
+- [x] Add minimal Android HOME app scaffold and CI workflow.
 - [ ] Verify first CI build and lint.
+- [ ] Add and verify Gradle Wrapper.
 
 Acceptance: clean Android build, HOME activity declaration, no unnecessary permissions, docs agree with code.
 

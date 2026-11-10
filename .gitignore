@@ -1,0 +1,18 @@
+# Android / Gradle
+.gradle/
+build/
+**/build/
+local.properties
+*.iml
+.idea/
+.DS_Store
+
+# Signing and local configuration
+*.jks
+*.keystore
+secrets.properties
+
+# Test and profiling output
+captures/
+*.hprof
+*.trace

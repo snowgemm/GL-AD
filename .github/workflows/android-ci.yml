@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: android-ci-\${{ github.workflow }}-\${{ github.ref }}
+  group: android-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -38,8 +38,6 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "9.6.0"
 
       - name: Run unit tests, lint, and debug build
-        run: gradle :app:testDebugUnitTest :app:lintDebug :app:assembleDebug --no-daemon
+        run: ./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug --no-daemon

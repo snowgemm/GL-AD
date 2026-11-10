@@ -26,11 +26,11 @@ Status: Proposed for initial scaffold.
 - compileSdk 37.
 - targetSdk 37.
 - Java 17.
-- Android Gradle Plugin 9.4.1 and Gradle 9.6.0.
+- Android Gradle Plugin 9.5.1 and Gradle 9.6.0.
 - Kotlin Compose compiler plugin 2.4.21.
 - Compose BOM 2026.09.00.
 
-Revalidate against official compatibility tables before first successful CI build. Do not use dynamic dependency versions.
+These versions are pinned from current stable release information. Revalidate against official compatibility tables during upgrades. Do not use dynamic dependency versions.
 
 ## ADR-005 — Permission minimization
 Status: Accepted.
