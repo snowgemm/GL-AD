@@ -28,6 +28,9 @@ A release candidate additionally requires:
 
 ### Instrumented/UI tests
 - HOME entry point launches.
+- Glass navigation remains readable when native backdrop rendering is unavailable.
+- Dock uses source fallback when available and clears retained content when the source disappears.
+- High-contrast/opaque material remains operable without refraction or blur.
 - App list loads and handles package removal.
 - Search filters the real app list.
 - Workspace reorder and folder operations preserve all items.
@@ -59,6 +62,8 @@ A release candidate additionally requires:
 
 ## Glass A/B matrix
 Compare:
+- Native Haze platform backdrop versus source-backed fallback versus opaque fallback.
+- Regular, Clear, Tinted, and HighContrast material variants.
 - Haze default/balanced versus quality/performance profiles.
 - Static wallpaper source versus live moving source.
 - One glass surface versus nested/overlapping surfaces.
