@@ -1,9 +1,11 @@
 package com.snowgemm.glad.platform.launcher
 
+import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.LauncherActivityInfo
 import android.content.pm.LauncherApps
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.util.concurrent.atomic.AtomicReference
 
 interface LauncherAppsRepository {
     fun observeApps(): Flow<List<LaunchableApp>>
@@ -39,6 +42,10 @@ class AndroidLauncherAppsRepository(
     private val iconSizePx = (52 * appContext.resources.displayMetrics.density)
         .toInt()
         .coerceIn(96, 192)
+
+    // Keep framework-specific LauncherActivityInfo objects out of UI/domain state.
+    private val activityInfoSnapshot =
+        AtomicReference<Map<String, LauncherActivityInfo>>(emptyMap())
 
     private val iconCache = object : LruCache<String, Bitmap>(8 * 1024) {
         override fun sizeOf(key: String, value: Bitmap): Int {
@@ -136,37 +143,50 @@ class AndroidLauncherAppsRepository(
             return emptyList()
         }
 
-        return profiles
-            .flatMap { profile ->
-                try {
-                    launcherApps.getActivityList(null, profile).mapNotNull { activityInfo ->
-                        val component = activityInfo.componentName
-                        val profileSerial = userManager.getSerialNumberForUser(activityInfo.user)
-                        if (profileSerial < 0L) return@mapNotNull null
+        val apps = mutableListOf<LaunchableApp>()
+        val activityInfos = HashMap<String, LauncherActivityInfo>()
 
-                        LaunchableApp(
-                            id = "${component.flattenToString()}@${profileSerial}",
-                            label = activityInfo.label
-                                .toString()
-                                .ifBlank { component.packageName },
-                            activityInfo = activityInfo,
-                        )
-                    }
-                } catch (_: SecurityException) {
-                    emptyList()
-                } catch (_: IllegalStateException) {
-                    emptyList()
+        profiles.forEach { profile ->
+            try {
+                launcherApps.getActivityList(null, profile).forEach { activityInfo ->
+                    val userSerial = userManager.getSerialNumberForUser(activityInfo.user)
+                    if (userSerial < 0L) return@forEach
+
+                    val component = activityInfo.componentName
+                    val app = LaunchableApp(
+                        componentName = component.flattenToString(),
+                        packageName = component.packageName,
+                        userSerial = userSerial,
+                        label = activityInfo.label
+                            .toString()
+                            .ifBlank { component.packageName },
+                    )
+                    apps += app
+                    activityInfos[app.id] = activityInfo
                 }
+            } catch (_: SecurityException) {
+                // A profile can become inaccessible while the launcher is refreshing.
+            } catch (_: IllegalStateException) {
+                // Locked or stopped profiles may temporarily expose no launchable apps.
             }
+        }
+
+        val uniqueApps = apps
             .distinctBy(LaunchableApp::id)
             .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER, LaunchableApp::label))
+
+        val visibleIds = uniqueApps.mapTo(HashSet(), LaunchableApp::id)
+        activityInfoSnapshot.set(activityInfos.filterKeys(visibleIds::contains))
+
+        return uniqueApps
     }
 
     override suspend fun loadIcon(app: LaunchableApp): Bitmap? = withContext(Dispatchers.IO) {
         iconCache.get(app.id)?.let { return@withContext it }
+        val activityInfo = activityInfoSnapshot.get()[app.id] ?: return@withContext null
 
         try {
-            val drawable: Drawable = app.activityInfo.getBadgedIcon(densityDpi)
+            val drawable: Drawable = activityInfo.getBadgedIcon(densityDpi)
             val bitmap = drawable.toBitmap(
                 width = iconSizePx,
                 height = iconSizePx,
@@ -180,9 +200,12 @@ class AndroidLauncherAppsRepository(
     }
 
     override fun launch(app: LaunchableApp) {
+        val activityInfo = activityInfoSnapshot.get()[app.id]
+            ?: throw ActivityNotFoundException("The launchable activity is no longer available.")
+
         launcherApps.startMainActivity(
-            app.componentName,
-            app.user,
+            activityInfo.componentName,
+            activityInfo.user,
             null,
             null,
         )

@@ -20,22 +20,22 @@ Do not enable experimental HazeInputSharing by default. Haze documentation repor
 Kyant0 Backdrop remains a comparison/reference implementation. Feature UI must not couple to either library API.
 
 ## ADR-004 — API and build baseline
-Status: Proposed for initial scaffold.
+Status: Accepted for the current foundation.
 
 - minSdk 33 (Android 13).
 - compileSdk 37.
 - targetSdk 37.
 - Java 17.
-- Android Gradle Plugin 9.5.1 and Gradle 9.6.0; Android SDK Platform 37.0 and Build Tools 37.0.0.
+- Android Gradle Plugin 9.5.1 and Gradle 9.6.0.
 - Kotlin Compose compiler plugin 2.4.21.
 - Compose BOM 2026.09.00.
 
-These versions are pinned from current stable release information. Revalidate against official compatibility tables during upgrades. Do not use dynamic dependency versions.
+Android 17 (API 37) is released. Revalidate against official compatibility tables during upgrades. Do not use dynamic dependency versions.
 
 ## ADR-005 — Permission minimization
 Status: Accepted.
 
-No QUERY_ALL_PACKAGES, SYSTEM_ALERT_WINDOW, notification listener, accessibility service, root, or Shizuku requirement in the initial scaffold. Add a special permission only with a concrete feature, user-facing explanation, and test plan.
+No QUERY_ALL_PACKAGES, SYSTEM_ALERT_WINDOW, notification listener, accessibility service, root, or Shizuku requirement in the initial scaffold. Use a narrow MAIN/LAUNCHER package-visibility query. Add a special permission only with a concrete feature, user-facing explanation, and test plan.
 
 ## ADR-006 — License and source provenance
 Status: Open.
@@ -50,3 +50,13 @@ Fonts, icons, wallpapers, and screenshots need separate provenance records.
 Status: Accepted.
 
 Volume panel, system notification banners, and Quick Settings host cannot be freely restyled by an ordinary app. GL-AD uses in-app glass surfaces, MediaSession, TileService, Notification APIs, and optional notification access only where appropriate.
+
+## ADR-008 — Stable profile identity and platform boundary
+Status: Accepted.
+
+Do not use hidden UserHandle fields or persist UserHandle objects as app identity. Use UserManager.getSerialNumberForUser() with flattened ComponentName to produce profile-scoped app identity. Keep LauncherActivityInfo and UserHandle inside the platform repository; expose plain app models to the presentation layer.
+
+## ADR-009 — Pinned CI actions
+Status: Accepted.
+
+Use verified GitHub Action release commit SHAs, not mutable major-version tags, for checkout, JDK setup, Android SDK setup, and Gradle setup. Keep the release tag in a YAML comment for maintenance.

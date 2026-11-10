@@ -11,6 +11,11 @@ A release candidate additionally requires:
 - Physical-device install and HOME-role selection.
 - ADB log review for startup, package callbacks, and rendering failures.
 
+## Current automated coverage
+- App search: blank query, case-insensitive app label, package-name search, no-match behavior, whitespace normalization.
+- App identity: same component in different Android profiles receives a distinct identity; labels may change without changing identity.
+- Android lint and debug APK build are required CI checks.
+
 ## Test layers
 
 ### Unit tests
@@ -40,6 +45,8 @@ A release candidate additionally requires:
 7. Exercise volume state with no active session and fixed-volume device.
 8. Add/use/remove Quick Settings tile.
 9. Post/dismiss GL-AD-owned notification banner.
+10. Add/remove a managed profile and confirm app list refresh.
+11. Launch the same app from Personal and Work profiles.
 
 ## Performance methodology
 - Use release-like builds with R8 and Baseline Profiles.

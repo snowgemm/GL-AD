@@ -12,25 +12,34 @@
 - [x] Confirm repository metadata and default branch.
 - [x] Confirm repository was empty before bootstrap.
 - [x] Add project overview and create a dedicated foundation branch.
-- [x] Add product, architecture, design, and implementation specifications.
+- [x] Add product, architecture, design, testing, and implementation specifications.
 - [x] Add minimal Android HOME app scaffold and CI workflow.
-- [ ] Verify first CI build and lint.
+- [x] Verify Android SDK setup, Gradle, unit tests, lint, and debug build in GitHub Actions.
 - [x] Add Gradle Wrapper from the official Gradle 9.6.0 distribution; verify it in CI.
 
 Acceptance: clean Android build, HOME activity declaration, no unnecessary permissions, docs agree with code.
 
 ## Phase 1 — launcher core
-1. HOME role onboarding and default-role state.
-2. LauncherApps discovery and callbacks.
-3. Icon loading/cache with memory bounds.
-4. Workspace model and versioned persistence.
-5. App drawer and search.
-6. Dock and page grid.
-7. Drag/reorder and folder operations.
-8. App info/uninstall handoff and supported shortcuts.
-9. Widget host and profile behavior.
 
-Acceptance: app list matches launchable activities; package changes reconcile correctly; layout survives process death; interrupted drags do not lose items; no broad package permission without a documented need.
+### Implemented
+- [x] HOME role availability/held-state and system role request flow.
+- [x] Launchable activity discovery through LauncherApps.
+- [x] Profile-aware app identity using UserManager serial numbers.
+- [x] Package changes, package availability, suspension, and managed-profile lifecycle refresh.
+- [x] Bounded icon bitmap cache with profile-badged icons.
+- [x] App search by label and package name.
+- [x] Launch app activities using LauncherApps with the correct UserHandle.
+- [x] Unit tests for app search and profile-scoped identity.
+
+### Remaining
+1. Workspace data model and versioned persistence.
+2. Home pages, dock, and app placement.
+3. Drag/reorder, folders, and transactional layout updates.
+4. App info/uninstall handoff and supported shortcuts.
+5. AppWidgetHost integration.
+6. Managed-profile UX, private-space handling, and device compatibility checks.
+
+Acceptance: app list matches launchable activities; package/profile changes reconcile correctly; layout survives process death; interrupted drags do not lose items; no broad package permission without a documented need.
 
 ## Phase 2 — Liquid Glass
 1. Implement GL-AD-owned GlassSurface API.

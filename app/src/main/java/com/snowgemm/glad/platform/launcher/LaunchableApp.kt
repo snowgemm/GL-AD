@@ -1,26 +1,17 @@
 package com.snowgemm.glad.platform.launcher
 
-import android.content.ComponentName
-import android.content.pm.LauncherActivityInfo
-import android.os.UserHandle
-
 /**
- * A launchable activity in a specific Android user/profile.
+ * A launchable activity scoped to one Android user/profile.
  *
- * Keep the profile handle with the component so launches and identity remain correct
- * for personal and managed-profile copies of the same package.
+ * The profile serial keeps two copies of the same package distinct and can be
+ * persisted without storing framework UserHandle instances.
  */
-data class LaunchableApp internal constructor(
-    val id: String,
+data class LaunchableApp(
+    val componentName: String,
+    val packageName: String,
+    val userSerial: Long,
     val label: String,
-    internal val activityInfo: LauncherActivityInfo,
 ) {
-    val componentName: ComponentName
-        get() = activityInfo.componentName
-
-    val user: UserHandle
-        get() = activityInfo.user
-
-    val packageName: String
-        get() = componentName.packageName
+    val id: String
+        get() = "$componentName@$userSerial"
 }

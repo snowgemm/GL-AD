@@ -2,7 +2,19 @@
 
 **GL-AD** is an Android-first launcher project exploring a high-quality Liquid Glass design language while keeping Android system behavior native, permission-aware, and measurable.
 
-> Status: repository bootstrap. The initial repository was empty; implementation is being prepared on a dedicated foundation branch.
+## Current status
+
+The repository foundation and first Launcher Core slice are implemented on `foundation/plan-and-scaffold`. GitHub Actions has verified Android SDK setup, Gradle, unit tests, Android lint, and a debug APK build.
+
+Implemented in the current slice:
+- Android HOME role onboarding through RoleManager.
+- Launchable activity discovery across accessible profiles through LauncherApps.
+- Package/profile change callbacks and profile lifecycle broadcasts.
+- Search by app label or package name.
+- Badged app icons with a bounded bitmap cache.
+- App launch through LauncherApps using the correct profile handle.
+
+Physical-device validation, workspace persistence, dock, folders, widgets, and Glass surfaces remain in progress.
 
 ## Product direction
 
@@ -23,11 +35,13 @@ A regular third-party app cannot replace Android System UI wholesale. GL-AD will
 - [Liquid Glass design system](docs/DESIGN_SYSTEM.md)
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
 - [Architecture decisions](docs/DECISIONS.md)
-- [Agent instructions](CLAUDE.md)
+- [Testing and benchmark protocol](docs/TESTING.md)
+- [Claude Code instructions](CLAUDE.md)
+- [Agent instructions](AGENTS.md)
 
 ## Development baseline
 
-The proposed baseline is Android API 33+ (Android 13+) with compile/target API 37, Kotlin, Jetpack Compose, Material 3, and Haze 2.1.0 for the first Glass renderer evaluation. Versions are pinned and must be revalidated against official release notes before upgrades.
+Android 13+ (API 33), compile/target API 37, Kotlin, Jetpack Compose, Material 3, and Haze 2.1.0 as the first Glass renderer candidate. Dependency versions are pinned and must be revalidated against official release notes before upgrades.
 
 ## License
 
