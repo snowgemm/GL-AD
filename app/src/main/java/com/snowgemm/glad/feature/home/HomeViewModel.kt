@@ -6,8 +6,10 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.snowgemm.glad.data.workspace.WorkspaceRepository
 import com.snowgemm.glad.platform.launcher.AndroidLauncherAppsRepository
 import com.snowgemm.glad.platform.launcher.LaunchableApp
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -18,6 +20,7 @@ class HomeViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
     private val launcherRepository = AndroidLauncherAppsRepository(application)
+    private val workspaceRepository = WorkspaceRepository(application)
     private val roleManager = application.getSystemService(RoleManager::class.java)
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -39,6 +42,23 @@ class HomeViewModel(
                 .collect { apps ->
                     _uiState.update { state ->
                         state.copy(apps = apps, isLoading = false)
+                    }
+                }
+        }
+
+        viewModelScope.launch {
+            workspaceRepository.snapshot
+                .catch {
+                    _uiState.update { state ->
+                        state.copy(
+                            isWorkspaceLoading = false,
+                            message = "Unable to read the saved Home layout.",
+                        )
+                    }
+                }
+                .collect { workspace ->
+                    _uiState.update { state ->
+                        state.copy(workspace = workspace, isWorkspaceLoading = false)
                     }
                 }
         }
@@ -81,12 +101,51 @@ class HomeViewModel(
         }
     }
 
+    fun pinAppToHome(appId: String) {
+        mutateWorkspace {
+            pinToHome(appId)
+        }
+    }
+
+    fun moveAppToDock(appId: String) {
+        mutateWorkspace {
+            moveToDock(appId)
+        }
+    }
+
+    fun removeAppFromWorkspace(appId: String) {
+        mutateWorkspace {
+            removeApp(appId)
+        }
+    }
+
+    fun reorderHomePage(pageId: String, fromIndex: Int, toIndex: Int) {
+        mutateWorkspace {
+            reorderPage(pageId, fromIndex, toIndex)
+        }
+    }
+
     fun showHomeRoleUnavailable() {
         showMessage("The Home role is not available on this device.")
     }
 
     fun dismissMessage() {
         _uiState.update { it.copy(message = null) }
+    }
+
+    private fun mutateWorkspace(
+        operation: suspend WorkspaceRepository.() -> Unit,
+    ) {
+        viewModelScope.launch {
+            try {
+                workspaceRepository.operation()
+                _uiState.update { it.copy(message = null) }
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (exception: Exception) {
+                showMessage(exception.message ?: "Unable to save the Home layout.")
+            }
+        }
     }
 
     private fun showMessage(message: String) {

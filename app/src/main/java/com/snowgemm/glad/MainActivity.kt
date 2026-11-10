@@ -6,8 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.snowgemm.glad.feature.home.GLADApp
 import com.snowgemm.glad.feature.home.HomeViewModel
 
@@ -39,6 +39,9 @@ class MainActivity : ComponentActivity() {
                 },
                 onLaunchApp = viewModel::launchApp,
                 onLoadIcon = viewModel::loadIcon,
+                onPinAppToHome = viewModel::pinAppToHome,
+                onMoveAppToDock = viewModel::moveAppToDock,
+                onRemoveAppFromWorkspace = viewModel::removeAppFromWorkspace,
                 onDismissMessage = viewModel::dismissMessage,
             )
         }
