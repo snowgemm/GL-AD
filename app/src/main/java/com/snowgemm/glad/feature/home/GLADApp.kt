@@ -18,13 +18,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items as lazyRowItems
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -432,12 +433,16 @@ private fun DockSurface(
                 textAlign = TextAlign.Center,
             )
         } else {
-            Row(
+            LazyRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.Top,
+                contentPadding = PaddingValues(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                dockIds.forEach { appId ->
+                lazyRowItems(
+                    items = dockIds,
+                    key = { it },
+                    contentType = { "dock-app" },
+                ) { appId ->
                     val app = appsById[appId]
                     if (app == null) {
                         MissingDockItem(onRemove = { onRemove(appId) })
@@ -631,7 +636,7 @@ private fun AppDrawer(
                         onLoadIcon = onLoadIcon,
                         onClick = { onLaunchApp(app) },
                         actionLabel = when {
-                            isDocked -> "In Dock"
+                            isDocked -> "Move Home"
                             isPinned -> "On Home"
                             else -> "+ Home"
                         },
