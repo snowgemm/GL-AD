@@ -26,7 +26,7 @@ Status: Proposed for initial scaffold.
 - compileSdk 37.
 - targetSdk 37.
 - Java 17.
-- Android Gradle Plugin 9.5.1 and Gradle 9.6.0.
+- Android Gradle Plugin 9.5.1 and Gradle 9.6.0; Android SDK Platform 37.0 and Build Tools 37.0.0.
 - Kotlin Compose compiler plugin 2.4.21.
 - Compose BOM 2026.09.00.
 
