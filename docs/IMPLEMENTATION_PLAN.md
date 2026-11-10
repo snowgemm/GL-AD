@@ -15,7 +15,7 @@
 - [x] Add product, architecture, design, and implementation specifications.
 - [x] Add minimal Android HOME app scaffold and CI workflow.
 - [ ] Verify first CI build and lint.
-- [ ] Add and verify Gradle Wrapper.
+- [x] Add Gradle Wrapper from the official Gradle 9.6.0 distribution; verify it in CI.
 
 Acceptance: clean Android build, HOME activity declaration, no unnecessary permissions, docs agree with code.
 
