@@ -60,3 +60,13 @@ Do not use hidden UserHandle fields or persist UserHandle objects as app identit
 Status: Accepted.
 
 Use verified GitHub Action release commit SHAs, not mutable major-version tags, for checkout, JDK setup, Android SDK setup, and Gradle setup. Keep the release tag in a YAML comment for maintenance.
+
+
+## ADR-010 — Haze Glass backend and native backdrop fallback
+Status: Accepted for initial implementation; physical-device validation pending.
+
+Use Haze 2.1.0 `haze-glass` through `GLADGlassSurface`. The application enables the experimental platform-backdrop feature flag before Compose nodes attach. This makes same-window native backdrop rendering eligible; it does not guarantee that the native path is available or succeeds on every OEM build.
+
+Provide a source-backed fallback where an explicit Haze source exists. Use `HazeSourceRetention.ClearWhenUnavailable` for the dock backdrop so stale app imagery is not retained after source loss. Always draw a translucent or high-contrast fill and edge beneath the effect.
+
+Use `HazePerformanceMode.Default` (Balanced). Keep source sharing disabled (Never) until physical-device measurements establish that the GPU-memory tradeoff is worthwhile.
