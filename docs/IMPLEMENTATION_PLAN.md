@@ -30,14 +30,18 @@ Acceptance: clean Android build, HOME activity declaration, no unnecessary permi
 - [x] App search by label and package name.
 - [x] Launch app activities using LauncherApps with the correct UserHandle.
 - [x] Unit tests for app search and profile-scoped identity.
+- [x] Versioned workspace snapshot and transactional DataStore persistence.
+- [x] Workspace rules for unique placement, page/dock limits, and safe reordering.
+- [x] Unit tests for workspace operations and validation.
 
 ### Remaining
-1. Workspace data model and versioned persistence.
-2. Home pages, dock, and app placement.
-3. Drag/reorder, folders, and transactional layout updates.
-4. App info/uninstall handoff and supported shortcuts.
-5. AppWidgetHost integration.
-6. Managed-profile UX, private-space handling, and device compatibility checks.
+1. Bind workspace snapshots to HomeViewModel and render persistent Home pages/dock.
+2. Add app drawer actions to pin/unpin and move apps between workspace and dock.
+3. Add gesture-driven drag/reorder across pages and dock.
+4. Add folder model and persistence.
+5. Add app info/uninstall handoff and supported shortcuts.
+6. Add AppWidgetHost integration.
+7. Validate managed-profile UX, private-space behavior, and physical-device compatibility.
 
 Acceptance: app list matches launchable activities; package/profile changes reconcile correctly; layout survives process death; interrupted drags do not lose items; no broad package permission without a documented need.
 

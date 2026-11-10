@@ -47,13 +47,20 @@ com.snowgemm.glad/
 - Do not add QUERY_ALL_PACKAGES by default.
 - Use stable package/component identifiers; never persist list positions as identity.
 - Bound icon caches and invalidate on package/version/density changes.
-- Persist workspace layout transactionally.
 - Keep app discovery separate from workspace ordering.
 
 ## Workspace persistence
-Persist stable IDs, page index, grid cell, dock slot, folder membership, and visibility. Validate on load: no duplicate placement, no item in both dock and workspace, folder references exist, grid bounds are valid. Unknown apps must not silently erase the saved layout.
+Workspace state is a small, typed snapshot persisted through DataStore using a versioned JSON serializer. Each update is transactional through the DataStore update API; do not write workspace JSON directly from UI code.
 
-A versioned DataStore/JSON representation is acceptable initially if updates are atomic and schema-versioned. Use Room when relational queries and migrations justify it.
+The initial schema contains ordered pages of stable profile-scoped app IDs and a separate dock list. It enforces:
+- A schema version.
+- Unique page IDs.
+- Unique app placement across pages and dock.
+- A maximum of 24 app entries per page, 12 pages, and 5 dock items.
+- A non-empty page model even when the workspace is empty.
+- Stable app IDs based on flattened ComponentName plus UserManager profile serial.
+
+DataStore is appropriate for this small ordered state. Re-evaluate Room if folders, widgets, cross-entity references, partial updates, or larger query requirements make relational integrity materially useful. Schema upgrades must be explicit; do not silently discard unsupported future versions.
 
 ## Glass rendering boundary
 Expose GL-AD-owned interfaces:
@@ -86,7 +93,7 @@ App notifications use NotificationCompat/NotificationManager and versioned chann
 ## Failure handling
 Permission denied: actionable explanation, not crash or fake enabled state.
 Unsupported API: documented fallback.
-App removed during drag: cancel or reconcile safely.
-Corrupt workspace: restore last valid snapshot and preserve diagnostics.
+App removed during drag: cancel or reconcile the operation safely.
+Corrupt workspace: preserve the original file and surface a recoverable error; never silently overwrite user layout.
 Glass renderer failure: tinted translucent fallback with visible edge.
 Media session disappears: clear stale metadata and disable unsupported actions.
