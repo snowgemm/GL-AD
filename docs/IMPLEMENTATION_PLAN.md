@@ -28,32 +28,41 @@ Acceptance: clean Android build, HOME activity declaration, no unnecessary permi
 - [x] Package changes, package availability, suspension, and managed-profile lifecycle refresh.
 - [x] Bounded icon bitmap cache with profile-badged icons.
 - [x] App search by label and package name.
-- [x] Launch app activities using LauncherApps with the correct UserHandle.
+- [x] Launch app activities using the correct UserHandle.
 - [x] Unit tests for app search and profile-scoped identity.
 - [x] Versioned workspace snapshot and transactional DataStore persistence.
 - [x] Workspace rules for unique placement, page/dock limits, and safe reordering.
 - [x] Unit tests for workspace operations and validation.
+- [x] Bind workspace snapshots to HomeViewModel and render persistent Home pages/dock.
+- [x] App drawer actions to pin an app to Home and move docked apps back Home.
+- [x] Remove unavailable or docked apps from the workspace without silently losing layout state.
 
 ### Remaining
-1. Bind workspace snapshots to HomeViewModel and render persistent Home pages/dock.
-2. Add app drawer actions to pin/unpin and move apps between workspace and dock.
-3. Add gesture-driven drag/reorder across pages and dock.
-4. Add folder model and persistence.
-5. Add app info/uninstall handoff and supported shortcuts.
-6. Add AppWidgetHost integration.
-7. Validate managed-profile UX, private-space behavior, and physical-device compatibility.
+1. Gesture-driven drag/reorder across pages and dock.
+2. Folder model, persistence, and interaction.
+3. App info/uninstall handoff and supported shortcuts.
+4. AppWidgetHost integration.
+5. Managed-profile UX, private-space behavior, and physical-device compatibility.
 
 Acceptance: app list matches launchable activities; package/profile changes reconcile correctly; layout survives process death; interrupted drags do not lose items; no broad package permission without a documented need.
 
 ## Phase 2 — Liquid Glass
-1. Implement GL-AD-owned GlassSurface API.
-2. Add Haze 2.1.0 behind renderer boundary.
-3. Build reference scenes: dock, segmented nav, floating media card, folder, slider, banner.
-4. Add Regular, Clear, Tinted, HighContrast variants.
-5. Add reduced-transparency and reduced-motion support.
+
+### Implemented
+- [x] GL-AD-owned GlassSurface abstraction with material and opaque fallback modes.
+- [x] Haze 2.1.0 Glass behind the GL-AD design boundary.
+- [x] Merged segmented navigation material via hazeGlassContainer.
+- [x] Tinted glass dock with source-backed fallback and clear-on-unavailable retention.
+
+### Remaining
+1. Validate Android native window-backdrop rendering on API 33+ physical devices and OEM builds.
+2. Compare native backdrop with source-backed fallback and high-contrast mode.
+3. Add Clear/Regular/Tinted/HighContrast design tokens and user-facing reduced-transparency setting.
+4. Apply glass to contextual panels and media card.
+5. Add reduced-motion behavior and screenshot tests.
 6. Benchmark static/live source, one/multiple surfaces, and source-sharing options.
 
-Acceptance: stable visual snapshots; readable fallback; no full-screen blur every frame; documented release traces.
+Acceptance: stable visual snapshots; readable fallback; no full-screen blur every frame; documented release traces. Do not enable HazeInputSharing until real-device memory/frame-time measurements justify it.
 
 ## Phase 3 — media and volume
 1. Discover available media sessions through supported APIs.
