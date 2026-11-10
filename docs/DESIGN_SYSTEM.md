@@ -32,7 +32,12 @@ Initial token names are provisional until screenshot/device review:
 - Touch target: minimum 48dp.
 
 ## Components
-GlassSurface, GlassDock, GlassNavigation, GlassPanel, GlassIconButton, GlassSlider, GlassMediaCard, GlassBanner.
+- `GLADGlassSurface`: GL-AD-owned boundary for material role, shape, fallback fill, edge, and renderer.
+- `GLADGlassNavigation`: merged segmented control built with Haze's glass container.
+- `GlassDock`: tinted surface with app actions and a horizontal overflow path.
+- Future: GlassPanel, GlassIconButton, GlassSlider, GlassMediaCard, GlassBanner.
+
+Feature UI must use GL-AD components rather than importing Haze directly.
 
 ## Optical behavior
 The material may combine source capture, controlled blur/depth diffusion, boundary refraction, restrained chromatic dispersion, specular highlight, dark edge response, tint, and shape masking.
