@@ -54,6 +54,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import com.snowgemm.glad.domain.workspace.WorkspacePage
+import com.snowgemm.glad.design.glass.GLADGlassMaterial
+import com.snowgemm.glad.design.glass.GLADGlassNavigation
+import com.snowgemm.glad.design.glass.GLADGlassSurface
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import com.snowgemm.glad.platform.launcher.LaunchableApp
 
 private enum class LauncherTab {
@@ -74,6 +81,7 @@ fun GLADApp(
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(LauncherTab.Home) }
     var query by rememberSaveable { mutableStateOf("") }
+    val hazeState = rememberHazeState()
 
     val appsById = remember(uiState.apps) {
         uiState.apps.associateBy(LaunchableApp::id)
@@ -120,27 +128,13 @@ fun GLADApp(
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(Color.White.copy(alpha = 0.07f))
-                        .padding(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    TabItem(
-                        label = "Home",
-                        selected = selectedTab == LauncherTab.Home,
-                        modifier = Modifier.weight(1f),
-                        onClick = { selectedTab = LauncherTab.Home },
-                    )
-                    TabItem(
-                        label = "Apps",
-                        selected = selectedTab == LauncherTab.Apps,
-                        modifier = Modifier.weight(1f),
-                        onClick = { selectedTab = LauncherTab.Apps },
-                    )
-                }
+                GLADGlassNavigation(
+                    selectedIndex = if (selectedTab == LauncherTab.Home) 0 else 1,
+                    labels = listOf("Home", "Apps"),
+                    onSelect = { index ->
+                        selectedTab = if (index == 0) LauncherTab.Home else LauncherTab.Apps
+                    },
+                )
 
                 if (selectedTab == LauncherTab.Apps) {
                     OutlinedTextField(
@@ -183,6 +177,7 @@ fun GLADApp(
                             onLoadIcon = onLoadIcon,
                             onMoveToDock = onMoveAppToDock,
                             onRemove = onRemoveAppFromWorkspace,
+                            hazeState = hazeState,
                             modifier = Modifier.weight(1f),
                         )
                     }
@@ -285,6 +280,7 @@ private fun HomeWorkspace(
     onLoadIcon: suspend (LaunchableApp) -> Bitmap?,
     onMoveToDock: (String) -> Unit,
     onRemove: (String) -> Unit,
+    hazeState: HazeState,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -303,7 +299,8 @@ private fun HomeWorkspace(
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .weight(1f)
+                .hazeSource(hazeState),
             key = { pageIndex -> pages.getOrNull(pageIndex)?.id ?: "empty-home" },
         ) { pageIndex ->
             val page = pages.getOrNull(pageIndex) ?: WorkspacePage("empty-home")
@@ -371,6 +368,7 @@ private fun HomeWorkspace(
             onLaunchApp = onLaunchApp,
             onLoadIcon = onLoadIcon,
             onRemove = onRemove,
+            hazeState = hazeState,
         )
     }
 }
@@ -407,15 +405,20 @@ private fun DockSurface(
     onLaunchApp: (LaunchableApp) -> Unit,
     onLoadIcon: suspend (LaunchableApp) -> Bitmap?,
     onRemove: (String) -> Unit,
+    hazeState: HazeState,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(28.dp))
-            .background(Color.White.copy(alpha = 0.10f))
-            .padding(horizontal = 8.dp, vertical = 10.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+    GLADGlassSurface(
+        modifier = Modifier.fillMaxWidth(),
+        material = GLADGlassMaterial.Tinted,
+        shape = RoundedCornerShape(28.dp),
+        input = HazeInput.Backdrop(hazeState),
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
         Text(
             text = "DOCK",
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -457,6 +460,7 @@ private fun DockSurface(
                 }
             }
         }
+    }
     }
 }
 
