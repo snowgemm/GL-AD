@@ -59,6 +59,7 @@ import com.snowgemm.glad.design.glass.GLADGlassNavigation
 import com.snowgemm.glad.design.glass.GLADGlassSurface
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeSourceRetention
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import com.snowgemm.glad.platform.launcher.LaunchableApp
@@ -248,30 +249,6 @@ private fun LauncherHeader(isHomeRoleHeld: Boolean) {
 }
 
 @Composable
-private fun TabItem(
-    label: String,
-    selected: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(if (selected) Color.White.copy(alpha = 0.16f) else Color.Transparent)
-            .clickable(onClick = onClick)
-            .padding(vertical = 11.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = Color.White,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-        )
-    }
-}
-
-@Composable
 private fun HomeWorkspace(
     pages: List<WorkspacePage>,
     dockIds: List<String>,
@@ -411,55 +388,60 @@ private fun DockSurface(
         modifier = Modifier.fillMaxWidth(),
         material = GLADGlassMaterial.Tinted,
         shape = RoundedCornerShape(28.dp),
-        input = HazeInput.Backdrop(hazeState),
+        input = HazeInput.Backdrop(
+            fallback = HazeInput.Sources(
+                state = hazeState,
+                retention = HazeSourceRetention.ClearWhenUnavailable,
+            ),
+        ),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-        Text(
-            text = "DOCK",
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            style = MaterialTheme.typography.labelSmall,
-            color = Color.White.copy(alpha = 0.62f),
-        )
-        if (dockIds.isEmpty()) {
-            Text(
-                text = "Add up to five apps from Home",
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 7.dp),
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.62f),
-                textAlign = TextAlign.Center,
-            )
-        } else {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(horizontal = 8.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                lazyRowItems(
-                    items = dockIds,
-                    key = { it },
-                    contentType = { "dock-app" },
-                ) { appId ->
-                    val app = appsById[appId]
-                    if (app == null) {
-                        MissingDockItem(onRemove = { onRemove(appId) })
-                    } else {
-                        DockAppItem(
-                            app = app,
-                            onLoadIcon = onLoadIcon,
-                            onClick = { onLaunchApp(app) },
-                            onRemove = { onRemove(appId) },
-                        )
+            Text(
+                text = "DOCK",
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.62f),
+            )
+            if (dockIds.isEmpty()) {
+                Text(
+                    text = "Add up to five apps from Home",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 7.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.62f),
+                    textAlign = TextAlign.Center,
+                )
+            } else {
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    lazyRowItems(
+                        items = dockIds,
+                        key = { it },
+                        contentType = { "dock-app" },
+                    ) { appId ->
+                        val app = appsById[appId]
+                        if (app == null) {
+                            MissingDockItem(onRemove = { onRemove(appId) })
+                        } else {
+                            DockAppItem(
+                                app = app,
+                                onLoadIcon = onLoadIcon,
+                                onClick = { onLaunchApp(app) },
+                                onRemove = { onRemove(appId) },
+                            )
+                        }
                     }
                 }
             }
-        }
     }
     }
 }
