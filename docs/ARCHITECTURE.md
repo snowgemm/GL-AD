@@ -69,7 +69,11 @@ Expose GL-AD-owned interfaces:
 - GlassSurface: Compose component owning shape, semantics, interaction, and fallback.
 - GlassRenderer: implementation backed by Haze or a future renderer.
 
-Feature UI must not depend directly on Haze types. Initial candidate is Haze 2.1.0 with core and glass artifacts. Keep HazeInputSharing disabled until memory and frame-time measurements justify it.
+Feature UI must not depend directly on Haze types. The current adapter is `GLADGlassSurface`, which owns material roles, shape, fallback fill, edge treatment, and accessibility-safe opaque mode. Haze 2.1.0 is the renderer behind this boundary.
+
+The application enables Haze's experimental platform window-backdrop flag before attaching Compose content. Native backdrop rendering is eligibility-based, not guaranteed on every device or OEM build. `HazeInput.Backdrop` falls back to a captured source when available; the dock uses `ClearWhenUnavailable` so stale source pixels are not retained. If neither path is available, the GL-AD translucent/opaque fill remains visible.
+
+Use Haze's default Balanced performance profile initially. Keep `HazeInputSharing.Never` (the default) until measured memory and frame-time gains justify enabling it.
 
 Do not sample content across windows or retain pixels from sources that may contain private content. Prefer explicit source selection and clear retained output when a source disappears.
 
