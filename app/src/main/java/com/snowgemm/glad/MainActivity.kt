@@ -9,6 +9,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.snowgemm.glad.feature.home.GLADApp
+import dev.chrisbanes.haze.ExperimentalHazeApi
+import dev.chrisbanes.haze.HazeFeatureFlags
 import com.snowgemm.glad.feature.home.HomeViewModel
 
 class MainActivity : ComponentActivity() {
@@ -20,8 +22,10 @@ class MainActivity : ComponentActivity() {
         viewModel.refreshHomeRole()
     }
 
+    @OptIn(ExperimentalHazeApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        HazeFeatureFlags.isPlatformBackdropEnabled = true
         enableEdgeToEdge()
 
         setContent {
