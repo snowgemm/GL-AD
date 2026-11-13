@@ -46,7 +46,7 @@ A release candidate additionally requires:
 5. Open/close a glass folder and navigation surface.
 6. Display active media and dispatch supported playback actions.
 7. Exercise volume state with no active session and fixed-volume device.
-8. Add/use/remove Quick Settings tile.
+8. Confirm Android's native Quick Settings remains available and unchanged.
 9. Post/dismiss GL-AD-owned notification banner.
 10. Add/remove a managed profile and confirm app list refresh.
 11. Launch the same app from Personal and Work profiles.
@@ -68,7 +68,6 @@ Compare:
 - Static wallpaper source versus live moving source.
 - One glass surface versus nested/overlapping surfaces.
 - Ordinary source sampling versus experimental source sharing.
-- Regular, Clear, Tinted, and high-contrast fallback.
 - 60Hz versus 90Hz/120Hz.
 - API 33 device versus current API 37 device.
 
