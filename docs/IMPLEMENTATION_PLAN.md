@@ -1,9 +1,10 @@
 # Implementation plan
 
 ## Operating rules
-- Work on one coherent task branch at a time.
-- Inspect branches, open PRs, CI, and unfinished work before starting another task.
-- Do not create a PR by default.
+- Keep `main` as the only integration branch.
+- When a change needs isolation, test it on a temporary test branch or in a local worktree; do not create a PR.
+- After tests pass, fast-forward the tested commit to `main`; never force-push or overwrite unrelated work.
+- Inspect `main`, test branches, CI, and unfinished work before starting another task.
 - Re-read changed files and run relevant checks after each coherent change.
 - Keep production code and docs in English; explain decisions to the owner in Vietnamese.
 - Never fake platform state or claim success before the platform confirms it.
@@ -69,32 +70,30 @@ Acceptance: stable visual snapshots; readable fallback; no full-screen blur ever
 2. Map metadata and playback state to immutable UI state.
 3. Expose only commands supported by the session.
 4. Add GL-AD media card.
-5. Add volume information and supported in-app controls.
+5. Add Volume Center information and supported in-app controls.
 6. Test fixed-volume devices, denied access, no active session, and session removal.
 
 Acceptance: no stale metadata; unsupported controls disabled/omitted; global volume limitations respected; no unnecessary background service.
 
-## Phase 4 — controls
-1. Build in-app controls for features GL-AD owns.
-2. Add Quick Settings tile prototypes.
-3. Synchronize tile state with actual system state.
-4. Route restricted actions to system Settings.
-5. Add permission and availability education.
+## Phase 4 — system UI boundaries
+- [x] Exclude a custom Control Center and Quick Settings replacement from product scope.
+- [x] Keep Android's native Quick Settings panel; do not add custom Quick Settings tiles.
+- [ ] Verify that no implementation or documentation implies GL-AD can replace protected system controls.
 
-Acceptance: tile state remains correct after service recreation; no misleading toggles; permissions are optional and revocable.
+Acceptance: GL-AD does not impersonate or replace Android Quick Settings; settings shortcuts open the real system Settings surfaces.
 
-## Phase 5 — notifications
+## Phase 5 — notifications and Dynamic Island
 1. Create app notification channels.
 2. Add runtime notification permission onboarding.
-3. Build in-app banners for GL-AD events.
-4. Add optional notification listener only if a concrete use case is approved.
-5. Add privacy controls and redaction.
+3. Build in-app Notification Center for GL-AD-owned events.
+4. Add optional NotificationListenerService only after explicit opt-in, disclosure, and privacy controls.
+5. Add Dynamic Island-style live activity surface backed by actual platform state and explicit source lifecycle.
 
-Acceptance: no notification content stored/uploaded by default; notification access never requested without explanation; Android owns system presentation.
+Acceptance: no notification content stored/uploaded by default; notification access never requested without explanation; Android owns system presentation; live activities never display stale or inferred states.
 
 ## Phase 6 — hardening and release
 - Unit and UI tests.
-- Macrobenchmark journeys: cold start, app drawer scroll, workspace swipe, folder morph, glass dock, media card, banner.
+- Macrobenchmark journeys: cold start, app drawer scroll, workspace swipe, folder morph, glass dock, media card, notification center.
 - Perfetto and frame timing captures on physical devices.
 - Memory/thermal soak.
 - Accessibility, RTL, font scale, tablet/foldable, and edge-to-edge checks.
@@ -103,3 +102,6 @@ Acceptance: no notification content stored/uploaded by default; notification acc
 - Privacy and permission disclosures.
 
 Acceptance: critical checks pass, known limitations documented, release artifacts reproducible.
+
+## Optional Rust evaluation
+After launcher core and platform integrations are stable, benchmark whether any platform-independent domain workload justifies Rust. Prototype a narrow UniFFI bridge, verify Android ABI builds and lifecycle safety, and compare against idiomatic Kotlin. Do not add Rust dependencies or native build complexity without a measured benefit.
