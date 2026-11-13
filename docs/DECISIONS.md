@@ -49,7 +49,7 @@ Fonts, icons, wallpapers, and screenshots need separate provenance records.
 ## ADR-007 — No hidden global UI replacement
 Status: Accepted.
 
-Volume panel, system notification banners, and Quick Settings host cannot be freely restyled by an ordinary app. GL-AD uses in-app glass surfaces, MediaSession, TileService, Notification APIs, and optional notification access only where appropriate.
+Volume panel, system notification banners, and Quick Settings host cannot be freely restyled by an ordinary app. GL-AD uses in-app glass surfaces, MediaSession, AudioManager within platform limits, Notification APIs, and optional notification access only where appropriate. A custom Control Center, Quick Settings replacement, and custom Quick Settings tiles are out of scope.
 
 ## ADR-008 — Stable profile identity and platform boundary
 Status: Accepted.
@@ -61,7 +61,6 @@ Status: Accepted.
 
 Use verified GitHub Action release commit SHAs, not mutable major-version tags, for checkout, JDK setup, Android SDK setup, and Gradle setup. Keep the release tag in a YAML comment for maintenance.
 
-
 ## ADR-010 — Haze Glass backend and native backdrop fallback
 Status: Accepted for initial implementation; physical-device validation pending.
 
@@ -70,3 +69,8 @@ Use Haze 2.1.0 `haze-glass` through `GLADGlassSurface`. The application enables 
 Provide a source-backed fallback where an explicit Haze source exists. Use `HazeSourceRetention.ClearWhenUnavailable` for the dock backdrop so stale app imagery is not retained after source loss. Always draw a translucent or high-contrast fill and edge beneath the effect.
 
 Use `HazePerformanceMode.Default` (Balanced). Keep source sharing disabled (Never) until physical-device measurements establish that the GPU-memory tradeoff is worthwhile.
+
+## ADR-011 — Optional Rust domain core
+Status: Planned; not implemented.
+
+Keep Android lifecycle, UI, framework APIs, and platform adapters in Kotlin. Evaluate Rust only for platform-independent logic that demonstrates a measurable performance, safety, or maintainability benefit. Prefer UniFFI for a typed Kotlin boundary; use NDK/cargo-ndk for Android targets. No Rust module is part of the current scaffold, and no native build dependency should be introduced until a small prototype passes ABI, lifecycle, test, and performance checks.
