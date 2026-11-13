@@ -2,7 +2,8 @@
 
 Read README.md, CLAUDE.md, and relevant documents under docs/ before changing code.
 
-- Inspect branches, open PRs, CI, and unfinished work first.
+- Inspect `main`, any temporary test branch, CI, and unfinished work first.
+- `main` is the only integration branch. Do not create PRs. If isolation is needed, test without a PR and fast-forward the verified result to `main`.
 - Verify current Android, Compose, and dependency documentation before implementation.
 - Preserve native Android permission and system-UI boundaries.
 - Keep UI independent from platform APIs and the selected Glass library.
