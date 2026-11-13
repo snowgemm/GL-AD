@@ -21,7 +21,6 @@ com.snowgemm.glad/
   platform/audio/
   platform/media/
   platform/notifications/
-  platform/quicksettings/
   platform/permissions/
   data/apps/
   data/workspace/
@@ -36,7 +35,9 @@ com.snowgemm.glad/
   feature/folders/
   feature/search/
   feature/media/
-  feature/controls/
+  feature/notifications/
+  feature/volume/
+  feature/dynamicisland/
   feature/settings/
   quality/diagnostics/
 ~~~
@@ -80,11 +81,14 @@ Do not sample content across windows or retain pixels from sources that may cont
 ## Audio and media
 Separate MediaController, PlaybackCommandGateway, VolumeGateway, and immutable MediaUiState. Do not conflate media, ring, alarm, call, accessibility, and assistant usages. An ordinary launcher cannot change every global stream.
 
-## Controls
-In-app controls are ordinary Compose features backed by repositories/use cases. Quick Settings tiles are independent TileService entry points. Each tile refreshes from actual platform state and tolerates service recreation. If direct mutation is restricted, open the relevant Settings page.
+## System UI boundary
+Do not implement a custom Control Center, Quick Settings replacement, or custom Quick Settings tiles. Android owns the native Quick Settings panel. GL-AD may provide clearly labeled shortcuts that open Android Settings, but must not present unsupported system toggles as functional controls.
 
 ## Notifications
 App notifications use NotificationCompat/NotificationManager and versioned channels. In-app banners are only for GL-AD-owned events. NotificationListenerService is isolated behind an optional capability and explicit permission state. Do not persist notification text by default. Do not use SYSTEM_ALERT_WINDOW in the baseline.
+
+## Dynamic Island
+Treat the Dynamic Island-style surface as a presentation layer over real, timestamped platform state. Model each activity with a stable ID, source, lifecycle, privacy visibility, and supported actions. Remove stale activities when their source ends. Do not infer charging, timer, download, or media state from appearance or cached guesses. Overlay rendering is not part of the baseline and requires separate permission and OEM-compatibility review.
 
 ## State and concurrency
 - ViewModels expose StateFlow<UiState>.
@@ -101,3 +105,8 @@ App removed during drag: cancel or reconcile the operation safely.
 Corrupt workspace: preserve the original file and surface a recoverable error; never silently overwrite user layout.
 Glass renderer failure: tinted translucent fallback with visible edge.
 Media session disappears: clear stale metadata and disable unsupported actions.
+
+## Optional Rust core
+Kotlin remains the Android application layer: Compose UI, lifecycle, services, permissions, LauncherApps, MediaSession, AudioManager, notifications, widgets, and platform integration.
+
+A Rust library may be introduced only for platform-independent core logic where profiling or complexity justifies it. Keep the boundary narrow and expose stable typed interfaces through UniFFI (preferred for generated Kotlin bindings) or JNI when a concrete limitation requires it. Build Android targets with the NDK and cargo-ndk. Do not move Android framework calls, Compose state, or simple collection transformations into Rust. The current scaffold does not yet contain a Rust module; evaluate and test the bridge before integrating it.
